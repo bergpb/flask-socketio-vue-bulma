@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html class="has-background-grey-dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flask SocketIO Test</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/vue.min.js') }}"></script>
+</head>
+<body>
+  <div id="app">
+    <section class="section">
+    <div class="container">
+      <h1 class="title has-text-centered has-text-white pt-6">
+        Flask + Socket.IO + Vue + Bulma
+      </h1>
+      <h1 style="font-size: 60vmin;" class="title has-text-centered has-text-white">
+        { content }
+      </h1>
+    </div>
+  </section>
+  </div>
+</body>
+<script type="text/javascript">
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
+  var app = new Vue({
+      el: "#app",
+      delimiters: ['{', '}'],
+      data: { content: '{{ value }}' }
+  });
+  // verify our websocket connection is established
+  socket.on('connect', function() {
+      console.log('Websocket connected!');
+  });
+  // update values to show in screen
+  function updateValues() {
+    console.log('Updating content...');
+    socket.emit('update', {'msg': 'Content updated...'});
+  }
+  // receive confirmation
+  socket.on('updated', function(content) {
+      console.log('Printing msg...!', content.msg);
+      // update var after confirmation
+      app.$set(app, 'content', content.msg);
+  });
+  // auto update content in 2 seconds
+  setInterval(function(){ updateValues(); }, 2000);
+  </script>
+</html>
